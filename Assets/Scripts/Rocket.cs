@@ -5,27 +5,42 @@ using UnityEngine;
 
 public class Rocket : MonoBehaviour
 {
-    [SerializeField] private Transform _root;
-    [SerializeField] private Transform _target;
+    [SerializeField] private GameObject _explosion;
     [SerializeField] private float _speed;
+    [SerializeField] private float _force;
+    [SerializeField] private float _radius;
 
-    public void Activate()
+    private Rigidbody _rigidbody;
+    private Transform _target;
+
+    public event Action<Rocket> Destroyed;
+
+    public void Init(Transform target)
     {
+        _rigidbody = GetComponent<Rigidbody>();
+        _target = target;
         enabled = true;
     }
 
     private void Update()
     {
-        _root.LookAt(_target);
-        _root.Translate(_root.TransformDirection(_root.forward) * _speed * Time.deltaTime);
+        transform.LookAt(_target);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void FixedUpdate()
     {
-        AirplaneController player = other.GetComponentInParent<AirplaneController>();
+        _rigidbody.MovePosition(transform.position + transform.forward * _speed * Time.deltaTime);
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        AirplaneController player = other.gameObject.GetComponentInParent<AirplaneController>();
         if (player != null)
         {
-            Destroy(_root.gameObject);
+            player.GetComponent<Rigidbody>().AddExplosionForce(_force, other.GetContact(0).point, _radius);
+            Instantiate(_explosion, other.GetContact(0).point, Quaternion.identity);
+            Destroy(gameObject);
+            Destroyed?.Invoke(this);
         }
     }
 }

@@ -12,6 +12,7 @@ public class AirplaneController : MonoBehaviour
     [SerializeField] private float _maxForwardSpeed;
     [SerializeField] private float _forwardSpeedAcceleration;
     [SerializeField] private float _liftEpsilon;
+    [SerializeField] private LevelUI _levelUi;
 
     private AirplaneView _airplaneView;
     private float _yRotation;
@@ -56,6 +57,9 @@ public class AirplaneController : MonoBehaviour
         float liftCoef =
             Mathf.Abs(Vector3.Dot(transform.forward, Vector3.ProjectOnPlane(transform.forward, Vector3.up)));
         _liftForce *= liftCoef;
+
+        _levelUi.SetInfoText(Mathf.RoundToInt(_forwardSpeed / _maxForwardSpeed * 100),
+            Mathf.RoundToInt(_liftForce / (Physics.gravity.y + _liftEpsilon) * 100));
 
         if (Input.GetKey(KeyCode.Q))
         {

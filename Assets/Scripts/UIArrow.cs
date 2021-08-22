@@ -7,6 +7,7 @@ using UnityEngine;
 public class UIArrow : MonoBehaviour
 {
     [SerializeField] private Transform _player;
+    [SerializeField] private float _rotationSpeed;
 
     private List<Coin> _coins;
     private float _closestDistance;
@@ -26,7 +27,9 @@ public class UIArrow : MonoBehaviour
 
     private void FixedUpdate()
     {
-        transform.forward = GetClosestCoinDirection(_coins).Item1;
+        Quaternion desiredRotation = Quaternion.LookRotation(GetClosestCoinDirection(_coins).Item1);
+        transform.rotation =
+            Quaternion.RotateTowards(transform.rotation, desiredRotation, _rotationSpeed * Time.deltaTime);
     }
 
     private (Vector3, float) GetClosestCoinDirection(List<Coin> coins)
